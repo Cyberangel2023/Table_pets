@@ -158,70 +158,6 @@
         <file>resources/action/qing_31.png</file>
         <file>resources/action/qing_32.png</file>
     </qresource>
-    <qresource prefix="/Sleep">
-        <file>resources/action/qqend_0.png</file>
-        <file>resources/action/qqend_1.png</file>
-        <file>resources/action/qqend_2.png</file>
-        <file>resources/action/qqend_3.png</file>
-        <file>resources/action/qqend_4.png</file>
-        <file>resources/action/qqend_5.png</file>
-        <file>resources/action/qqend_6.png</file>
-        <file>resources/action/qqend_7.png</file>
-        <file>resources/action/qqend_8.png</file>
-        <file>resources/action/qqend_9.png</file>
-        <file>resources/action/qqend_10.png</file>
-        <file>resources/action/qqend_11.png</file>
-        <file>resources/action/qqend_12.png</file>
-        <file>resources/action/qqend_13.png</file>
-        <file>resources/action/qqend_14.png</file>
-        <file>resources/action/qqend_15.png</file>
-        <file>resources/action/qqend_16.png</file>
-        <file>resources/action/qqend_17.png</file>
-        <file>resources/action/qqend_18.png</file>
-        <file>resources/action/qqend_19.png</file>
-        <file>resources/action/qqend_20.png</file>
-        <file>resources/action/qqend_21.png</file>
-        <file>resources/action/qqend_22.png</file>
-        <file>resources/action/qqend_23.png</file>
-        <file>resources/action/qqend_24.png</file>
-        <file>resources/action/qqend_25.png</file>
-        <file>resources/action/qqend_26.png</file>
-        <file>resources/action/qqend_27.png</file>
-        <file>resources/action/qqend_28.png</file>
-        <file>resources/action/qqend_29.png</file>
-        <file>resources/action/qqend_30.png</file>
-        <file>resources/action/qqend_31.png</file>
-        <file>resources/action/qqend_32.png</file>
-        <file>resources/action/qqend_33.png</file>
-        <file>resources/action/qqend_34.png</file>
-        <file>resources/action/qqend_35.png</file>
-        <file>resources/action/qqend_36.png</file>
-        <file>resources/action/sleep_0.png</file>
-        <file>resources/action/sleep_1.png</file>
-        <file>resources/action/sleep_2.png</file>
-        <file>resources/action/sleep_3.png</file>
-        <file>resources/action/sleep_4.png</file>
-        <file>resources/action/sleep_5.png</file>
-        <file>resources/action/sleep_6.png</file>
-        <file>resources/action/sleep_7.png</file>
-        <file>resources/action/sleep_8.png</file>
-        <file>resources/action/sleep_9.png</file>
-        <file>resources/action/sleep_10.png</file>
-        <file>resources/action/sleep_11.png</file>
-        <file>resources/action/sleep_12.png</file>
-        <file>resources/action/sleep_13.png</file>
-        <file>resources/action/sleep_14.png</file>
-        <file>resources/action/sleep_15.png</file>
-        <file>resources/action/sleep_16.png</file>
-        <file>resources/action/sleep_17.png</file>
-        <file>resources/action/sleep_18.png</file>
-        <file>resources/action/sleep_19.png</file>
-        <file>resources/action/sleep_20.png</file>
-        <file>resources/action/sleep_21.png</file>
-        <file>resources/action/sleep_22.png</file>
-        <file>resources/action/sleep_23.png</file>
-        <file>resources/action/sleep_24.png</file>
-    </qresource>
     <qresource prefix="/Walk_left">
         <file>resources/action/walk_0.png</file>
         <file>resources/action/walk_1.png</file>
@@ -652,5 +588,70 @@
         <file>resources/action/t_22.png</file>
         <file>resources/action/t_23.png</file>
         <file>resources/action/t_24.png</file>
+    </qresource>
+    <qresource prefix="/Sleep">
+        <file>resources/action/sleep_0.png</file>
+        <file>resources/action/sleep_1.png</file>
+        <file>resources/action/sleep_2.png</file>
+        <file>resources/action/sleep_3.png</file>
+        <file>resources/action/sleep_4.png</file>
+        <file>resources/action/sleep_5.png</file>
+        <file>resources/action/sleep_6.png</file>
+        <file>resources/action/sleep_7.png</file>
+        <file>resources/action/sleep_8.png</file>
+        <file>resources/action/sleep_9.png</file>
+        <file>resources/action/sleep_10.png</file>
+        <file>resources/action/sleep_11.png</file>
+        <file>resources/action/sleep_12.png</file>
+        <file>resources/action/sleep_13.png</file>
+        <file>resources/action/sleep_14.png</file>
+        <file>resources/action/sleep_15.png</file>
+        <file>resources/action/sleep_16.png</file>
+        <file>resources/action/sleep_17.png</file>
+        <file>resources/action/sleep_18.png</file>
+        <file>resources/action/sleep_19.png</file>
+        <file>resources/action/sleep_20.png</file>
+        <file>resources/action/sleep_21.png</file>
+        <file>resources/action/sleep_22.png</file>
+        <file>resources/action/sleep_23.png</file>
+        <file>resources/action/sleep_24.png</file>
+    </qresource>
+    <qresource prefix="/Swing_end">
+        <file>resources/action/qqend_1.png</file>
+        <file>resources/action/qqend_2.png</file>
+        <file>resources/action/qqend_3.png</file>
+        <file>resources/action/qqend_4.png</file>
+        <file>resources/action/qqend_5.png</file>
+        <file>resources/action/qqend_6.png</file>
+        <file>resources/action/qqend_7.png</file>
+        <file>resources/action/qqend_8.png</file>
+        <file>resources/action/qqend_9.png</file>
+        <file>resources/action/qqend_10.png</file>
+        <file>resources/action/qqend_11.png</file>
+        <file>resources/action/qqend_12.png</file>
+        <file>resources/action/qqend_13.png</file>
+        <file>resources/action/qqend_14.png</file>
+        <file>resources/action/qqend_15.png</file>
+        <file>resources/action/qqend_16.png</file>
+        <file>resources/action/qqend_17.png</file>
+        <file>resources/action/qqend_18.png</file>
+        <file>resources/action/qqend_19.png</file>
+        <file>resources/action/qqend_20.png</file>
+        <file>resources/action/qqend_21.png</file>
+        <file>resources/action/qqend_22.png</file>
+        <file>resources/action/qqend_23.png</file>
+        <file>resources/action/qqend_24.png</file>
+        <file>resources/action/qqend_25.png</file>
+        <file>resources/action/qqend_26.png</file>
+        <file>resources/action/qqend_27.png</file>
+        <file>resources/action/qqend_28.png</file>
+        <file>resources/action/qqend_29.png</file>
+        <file>resources/action/qqend_30.png</file>
+        <file>resources/action/qqend_31.png</file>
+        <file>resources/action/qqend_32.png</file>
+        <file>resources/action/qqend_33.png</file>
+        <file>resources/action/qqend_34.png</file>
+        <file>resources/action/qqend_35.png</file>
+        <file>resources/action/qqend_36.png</file>
     </qresource>
 </RCC>
