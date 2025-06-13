@@ -18,8 +18,22 @@ namespace Act {
 
 enum RoleAct {
         Greet,
+        Swing_start,
         Swing_ing,
-        Sleep
+        Swing_end,
+        Sleep,
+        Click,
+        Drag,
+        Applaud,
+        Fly,
+        Land,
+        Play_1,
+        Play_2,
+        Play_sit,
+        Sit,
+        Sluggish,
+        Stand,
+        Walk
     };
     Q_ENUM_NS(RoleAct);
 }
@@ -46,16 +60,23 @@ protected:
 
 private:
     //加载图片
-    void loadRoleActRes();
+    void loadRoleActResLeft();
+    void loadRoleActResRight();
     //初始化菜单
     void initMenu();
+    void CheckRoleAct(RoleAct roleAct);
 
 private:
-    QMap<RoleAct, QList<QUrl>> action_map;
+    QMap<RoleAct, QList<QUrl>> action_map_left;
+    QMap<RoleAct, QList<QUrl>> action_map_right;
     QTimer* timer;
     RoleAct cur_role_act;
+    RoleAct next_role_act;
     QUrl cur_role_pix;
     QMenu* menu;
+    bool isLeft;//根据你的需求设置初始方向
+    bool isLoop;//初始状态可能是循环站立
+    int index;//记录显示动作的当前图片索引
 };
 
 class DragFilter : public QObject {

@@ -30,7 +30,7 @@
         <file>resources/action/hs_27.png</file>
         <file>resources/action/hs_28.png</file>
     </qresource>
-    <qresource prefix="/Stand_left">
+    <qresource prefix="/Stand">
         <file>resources/action/hx_0.png</file>
         <file>resources/action/hx_1.png</file>
         <file>resources/action/hx_2.png</file>
@@ -56,33 +56,6 @@
         <file>resources/action/hx_22.png</file>
         <file>resources/action/hx_23.png</file>
         <file>resources/action/hx_24.png</file>
-    </qresource>
-    <qresource prefix="/Stand_right">
-        <file>resources/action/hx2_0.png</file>
-        <file>resources/action/hx2_1.png</file>
-        <file>resources/action/hx2_2.png</file>
-        <file>resources/action/hx2_3.png</file>
-        <file>resources/action/hx2_4.png</file>
-        <file>resources/action/hx2_5.png</file>
-        <file>resources/action/hx2_6.png</file>
-        <file>resources/action/hx2_7.png</file>
-        <file>resources/action/hx2_8.png</file>
-        <file>resources/action/hx2_9.png</file>
-        <file>resources/action/hx2_10.png</file>
-        <file>resources/action/hx2_11.png</file>
-        <file>resources/action/hx2_12.png</file>
-        <file>resources/action/hx2_13.png</file>
-        <file>resources/action/hx2_14.png</file>
-        <file>resources/action/hx2_15.png</file>
-        <file>resources/action/hx2_16.png</file>
-        <file>resources/action/hx2_17.png</file>
-        <file>resources/action/hx2_18.png</file>
-        <file>resources/action/hx2_19.png</file>
-        <file>resources/action/hx2_20.png</file>
-        <file>resources/action/hx2_21.png</file>
-        <file>resources/action/hx2_22.png</file>
-        <file>resources/action/hx2_23.png</file>
-        <file>resources/action/hx2_24.png</file>
     </qresource>
     <qresource prefix="/Swing_start">
         <file>resources/action/qq_0.png</file>
@@ -158,7 +131,7 @@
         <file>resources/action/qing_31.png</file>
         <file>resources/action/qing_32.png</file>
     </qresource>
-    <qresource prefix="/Walk_left">
+    <qresource prefix="/Walk">
         <file>resources/action/walk_0.png</file>
         <file>resources/action/walk_1.png</file>
         <file>resources/action/walk_2.png</file>
@@ -184,33 +157,6 @@
         <file>resources/action/walk_22.png</file>
         <file>resources/action/walk_23.png</file>
         <file>resources/action/walk_24.png</file>
-    </qresource>
-    <qresource prefix="/Walk_right">
-        <file>resources/action/walk2_0.png</file>
-        <file>resources/action/walk2_1.png</file>
-        <file>resources/action/walk2_2.png</file>
-        <file>resources/action/walk2_3.png</file>
-        <file>resources/action/walk2_4.png</file>
-        <file>resources/action/walk2_5.png</file>
-        <file>resources/action/walk2_6.png</file>
-        <file>resources/action/walk2_7.png</file>
-        <file>resources/action/walk2_8.png</file>
-        <file>resources/action/walk2_9.png</file>
-        <file>resources/action/walk2_10.png</file>
-        <file>resources/action/walk2_11.png</file>
-        <file>resources/action/walk2_12.png</file>
-        <file>resources/action/walk2_13.png</file>
-        <file>resources/action/walk2_14.png</file>
-        <file>resources/action/walk2_15.png</file>
-        <file>resources/action/walk2_16.png</file>
-        <file>resources/action/walk2_17.png</file>
-        <file>resources/action/walk2_18.png</file>
-        <file>resources/action/walk2_19.png</file>
-        <file>resources/action/walk2_20.png</file>
-        <file>resources/action/walk2_21.png</file>
-        <file>resources/action/walk2_22.png</file>
-        <file>resources/action/walk2_23.png</file>
-        <file>resources/action/walk2_24.png</file>
     </qresource>
     <qresource prefix="/Applaud">
         <file>resources/action/yb_0.png</file>
