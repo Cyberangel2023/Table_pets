@@ -4,6 +4,7 @@
 #include <QPixmap>//图片
 #include <QCursor>
 #include <QMetaEnum>
+#include <QPixmapCache>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -11,6 +12,7 @@ Widget::Widget(QWidget *parent)
     menu(new QMenu(this)),
     isLoop(true),
     isLeft(true),
+    isWill(false),
     index(0)
 {
     this->setWindowFlag(Qt::FramelessWindowHint);//去除窗口边框
@@ -18,13 +20,14 @@ Widget::Widget(QWidget *parent)
 
     this->installEventFilter(new DragFilter);
 
-    connect(timer, &QTimer::timeout, [this](){
+    connect(timer, &QTimer::timeout, this, [this](){
         auto paths = isLeft ? this->action_map_left.value(this->cur_role_act) :
                          this->action_map_right.value(this->cur_role_act);
-        int last_index = index;
         this->cur_role_pix = paths[index++ % paths.size()];
         this->update();
-        if (!isLoop && last_index + 1 == paths.size()) {
+        if (this->isWill && index >= paths.size()) {
+            showActAnimation(this->willRoleAct);
+        } else if (!isLoop && index >= paths.size()) {
             showActAnimation(this->next_role_act);
         }
     });
@@ -40,16 +43,27 @@ Widget::~Widget() {}
 void Widget::CheckRoleAct(RoleAct roleAct) {
     if (roleAct == RoleAct::Stand) {
         this->isLoop = true;
+    } else if (roleAct == RoleAct::Sleep) {
+        this->isLoop = true;
     } else if (roleAct == RoleAct::Swing_ing) {
         this->isLoop = true;
+    } else if (roleAct == RoleAct::Fly) {
+        this->isLoop = true;
+    } else if (roleAct == RoleAct::Greet) {
+        this->isLoop = false;
+        this->next_role_act = RoleAct::Stand;
+    } else if (roleAct == RoleAct::Greet) {
+        this->isLoop = false;
+        this->next_role_act = RoleAct::Stand;
     }
+    this->isWill = false;
 }
 
 void Widget::showActAnimation(RoleAct k)
 {
     timer->stop();
 
-    this->index = 0;
+    index = 0;
     this->cur_role_act = k;
     CheckRoleAct(this->cur_role_act);
 
@@ -59,36 +73,82 @@ void Widget::showActAnimation(RoleAct k)
 void Widget::onMenuTriggered(QAction *action)
 {
     const QString text = action->text();
-    RoleAct roleAct;
 
     if (text == "打招呼") {
-        roleAct = RoleAct::Greet;
-        this->isLoop = false;
-        this->next_role_act = RoleAct::Stand;
+        if (this->cur_role_act == RoleAct::Swing_ing) {
+            this->willRoleAct = RoleAct::Swing_end;
+            this->isLoop = false;
+            this->isWill = true;
+            this->next_role_act = RoleAct::Greet;
+            return;
+        } else if (this->cur_role_act == RoleAct::Fly) {
+
+        } else {
+            this->willRoleAct = RoleAct::Greet;
+            this->isLoop = false;
+            this->next_role_act = RoleAct::Stand;
+        }
     } else if (text == "荡秋千") {
-        roleAct = RoleAct::Swing_start;
-        this->isLoop = false;
-        this->next_role_act = RoleAct::Swing_ing;
+        if (this->cur_role_act == RoleAct::Swing_ing) {
+            return;
+        } else if (this->cur_role_act == RoleAct::Fly) {
+            this->willRoleAct = RoleAct::Swing_end;
+            this->isLoop = false;
+            this->isWill = true;
+            this->next_role_act = RoleAct::Fly_start;
+            return;
+        } else {
+            this->willRoleAct = RoleAct::Swing_start;
+            this->isLoop = false;
+            this->next_role_act = RoleAct::Swing_ing;
+        }
     } else if (text == "睡觉") {
-        roleAct = RoleAct::Sleep;
-        this->isLoop = true;
-        this->next_role_act = RoleAct::Stand;
+        if (this->cur_role_act == RoleAct::Swing_ing) {
+            this->willRoleAct = RoleAct::Swing_end;
+            this->isLoop = false;
+            this->isWill = true;
+            this->next_role_act = RoleAct::Sleep;
+            return;
+        } else if (this->cur_role_act == RoleAct::Fly) {
+
+        } else {
+            this->willRoleAct = RoleAct::Sleep;
+            this->isLoop = true;
+        }
+    } else if (text == "站立") {
+        if (this->cur_role_act == RoleAct::Swing_ing) {
+            this->willRoleAct = RoleAct::Swing_end;
+            this->isLoop = false;
+            this->isWill = true;
+            this->next_role_act = RoleAct::Stand;
+            return;
+        } else if (this->cur_role_act == RoleAct::Fly) {
+
+        } else {
+            this->willRoleAct = RoleAct::Stand;
+            this->isLoop = true;
+        }
     } else {
-        roleAct = RoleAct::Stand; // 默认动作
+        this->willRoleAct = RoleAct::Stand; // 默认动作
         this->isLoop = true;
     }
-
-    showActAnimation(roleAct);
+    showActAnimation(this->willRoleAct);
 }
 
-void Widget::paintEvent(QPaintEvent *event)
-{
+void Widget::paintEvent(QPaintEvent* event) {
+    Q_UNUSED(event);
     QPainter painter(this);
 
-    QPixmap pix;
-    pix.load(this->cur_role_pix.toLocalFile());
+    // 双缓冲：先绘制到临时图像
+    QPixmap buffer(size());
+    buffer.fill(Qt::transparent);
+    QPainter bufferPainter(&buffer);
 
-    painter.drawPixmap(0, 0, pix);
+    //从缓存获取图片（避免磁盘读取）
+    bufferPainter.drawPixmap(0,  0, cur_role_pix);
+
+    // 一次性绘制到屏幕
+    painter.drawPixmap(0,  0, buffer);
 }
 
 void Widget::contextMenuEvent(QContextMenuEvent *event)
@@ -99,13 +159,15 @@ void Widget::contextMenuEvent(QContextMenuEvent *event)
 void Widget::loadRoleActResLeft()
 {
     auto addRes = [this](RoleAct k, QString path, int count) {
-        QList<QUrl> paths;
+        QList<QPixmap> paths;
         char buf[260];
         //向左图片加载
         for (int i = 0; i <= count; ++i) {
             memset(buf, 0, sizeof(buf));
             sprintf_s(buf, path.toStdString().c_str(), i);
-            paths.append(QUrl::fromLocalFile(buf));
+            QPixmap pix;
+            pix.load(QUrl::fromLocalFile(buf).toLocalFile());
+            paths.append(pix);
         }
         action_map_left.insert(k, paths);
     };
@@ -132,13 +194,15 @@ void Widget::loadRoleActResLeft()
 void Widget::loadRoleActResRight()
 {
     auto addRes = [this](RoleAct k, QString path, int count) {
-        QList<QUrl> paths;
+        QList<QPixmap> paths;
         char buf[260];
-        //向右图片加载
+        //向左图片加载
         for (int i = 0; i <= count; ++i) {
             memset(buf, 0, sizeof(buf));
             sprintf_s(buf, path.toStdString().c_str(), i);
-            paths.append(QUrl::fromLocalFile(buf));
+            QPixmap pix;
+            pix.load(QUrl::fromLocalFile(buf).toLocalFile());
+            paths.append(pix);
         }
         action_map_right.insert(k, paths);
     };
@@ -167,9 +231,10 @@ void Widget::initMenu()
     menu->addAction("打招呼");
     menu->addAction("荡秋千");
     menu->addAction("睡觉");
+    menu->addAction("站立");
 
-    QAction* act = new QAction("Hide");
-    connect(act, &QAction::triggered, [this](){
+    QAction* act = new QAction("退出");
+    connect(act, &QAction::triggered, this, [this](){
         this->setVisible(false);
     });
 

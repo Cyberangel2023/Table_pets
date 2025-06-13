@@ -26,6 +26,7 @@ enum RoleAct {
         Drag,
         Applaud,
         Fly,
+        Fly_start,
         Land,
         Play_1,
         Play_2,
@@ -67,15 +68,17 @@ private:
     void CheckRoleAct(RoleAct roleAct);
 
 private:
-    QMap<RoleAct, QList<QUrl>> action_map_left;
-    QMap<RoleAct, QList<QUrl>> action_map_right;
+    QMap<RoleAct, QList<QPixmap>> action_map_left;
+    QMap<RoleAct, QList<QPixmap>> action_map_right;
     QTimer* timer;
     RoleAct cur_role_act;
     RoleAct next_role_act;
-    QUrl cur_role_pix;
+    RoleAct willRoleAct;
+    QPixmap cur_role_pix;
     QMenu* menu;
     bool isLeft;//根据你的需求设置初始方向
     bool isLoop;//初始状态可能是循环站立
+    bool isWill;//准备播放下一个动画
     int index;//记录显示动作的当前图片索引
 };
 

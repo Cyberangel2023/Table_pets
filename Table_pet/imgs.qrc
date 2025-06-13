@@ -29,6 +29,7 @@
         <file>resources/action/hs_26.png</file>
         <file>resources/action/hs_27.png</file>
         <file>resources/action/hs_28.png</file>
+        <file>resources/action/qqend_0.png</file>
     </qresource>
     <qresource prefix="/Stand">
         <file>resources/action/hx_0.png</file>
@@ -599,5 +600,6 @@
         <file>resources/action/qqend_34.png</file>
         <file>resources/action/qqend_35.png</file>
         <file>resources/action/qqend_36.png</file>
+        <file>resources/action/qqend_0.png</file>
     </qresource>
 </RCC>
