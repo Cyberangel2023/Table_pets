@@ -10,6 +10,7 @@
 #include <QMouseEvent>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QTime>
 
 class QPaintEvent;
 
@@ -52,6 +53,22 @@ public:
 public:
     void showActAnimation(RoleAct);
 
+    void setLoop(bool flag) {
+        this->isLoop = flag;
+    }
+
+    void setLeft(bool flag) {
+        this->isLeft = flag;
+    }
+
+    RoleAct getCurRoleAct() {
+        return this->cur_role_act;
+    }
+
+    void setNextRoleAct(RoleAct roleAct) {
+        this->next_role_act = roleAct;
+    }
+
 public slots:
     void onMenuTriggered(QAction* action);
 
@@ -83,8 +100,15 @@ private:
 };
 
 class DragFilter : public QObject {
+    Q_OBJECT
 public:
-    bool eventFilter(QObject* obj, QEvent* event) {
+    explicit DragFilter(Widget* widget, QObject* parent = nullptr)
+        : QObject(parent), widget(widget), mLongPressTimer(this) {
+        // 连接定时器的超时信号到 onLongPress 槽函数
+        connect(&mLongPressTimer, &QTimer::timeout, this, &DragFilter::onLongPress);
+    }
+
+    bool eventFilter(QObject* obj, QEvent* event) override {
         auto w = dynamic_cast<QWidget*>(obj);
         if (!w) {
             return false;
@@ -93,6 +117,13 @@ public:
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e) {
                 pos = e->pos();
+                if (widget->getCurRoleAct() == RoleAct::Stand && e->buttons() & Qt::MouseButton::LeftButton) {
+                    // 启动定时器，300毫秒后触发长按事件
+                    mLongPressTimer.start(100);
+                    mpressed = true;
+                    mclickStartPosition = e->pos();
+                    mclickStartTime = QTime::currentTime();
+                }
             }
         } else if (event->type() == QEvent::MouseMove) {
             auto e = dynamic_cast<QMouseEvent*>(event);
@@ -101,12 +132,50 @@ public:
                     w->move(e->globalPosition().toPoint() - pos);
                 }
             }
+        } else if (event->type() == QEvent::MouseButtonRelease) {
+            auto e = dynamic_cast<QMouseEvent*>(event);
+            if (e && e->button() == Qt::LeftButton) {
+                mpressed = false;
+                QTime currentTime = QTime::currentTime();
+                qint64 clickDuration = mclickStartTime.msecsTo(currentTime);
+                QPoint clickEndPosition = e->pos();
+                int clickDistance = QLineF(mclickStartPosition, clickEndPosition).length();
+
+                mLongPressTimer.stop();
+                // 检测是否为点击事件
+                if (widget->getCurRoleAct() == RoleAct::Stand && clickDuration < 100 && clickDistance < 5) { // 300ms内，移动距离小于5像素
+                    if (widget) {
+                        widget->showActAnimation(RoleAct::Click);
+                        widget->setLoop(false);
+                        widget->setNextRoleAct(RoleAct::Stand);
+                    }
+                }
+                if (widget->getCurRoleAct() == RoleAct::Drag) {
+                    if (widget) {
+                        widget->showActAnimation(RoleAct::Stand);
+                        widget->setLoop(true);
+                    }
+                }
+            }
         }
         return QObject::eventFilter(obj, event);
     }
 
+private slots:
+    void onLongPress() {
+        if (widget) {
+            widget->showActAnimation(RoleAct::Drag);
+            widget->setLoop(true);
+        }
+    }
+
 private:
     QPoint pos;
+    Widget* widget; //存储 Widget 的指针
+    bool mpressed;
+    QPoint mclickStartPosition;
+    QTime mclickStartTime;
+    QTimer mLongPressTimer;
 };
 
 #endif // WIDGET_H

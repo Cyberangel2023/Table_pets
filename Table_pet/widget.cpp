@@ -18,7 +18,7 @@ Widget::Widget(QWidget *parent)
     this->setWindowFlag(Qt::FramelessWindowHint);//去除窗口边框
     this->setAttribute(Qt::WA_TranslucentBackground);//去除窗口
 
-    this->installEventFilter(new DragFilter);
+    this->installEventFilter(new DragFilter(this));
 
     connect(timer, &QTimer::timeout, this, [this](){
         auto paths = isLeft ? this->action_map_left.value(this->cur_role_act) :
@@ -143,8 +143,6 @@ void Widget::paintEvent(QPaintEvent* event) {
     QPixmap buffer(size());
     buffer.fill(Qt::transparent);
     QPainter bufferPainter(&buffer);
-
-    //从缓存获取图片（避免磁盘读取）
     bufferPainter.drawPixmap(0,  0, cur_role_pix);
 
     // 一次性绘制到屏幕
