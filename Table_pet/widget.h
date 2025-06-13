@@ -11,6 +11,7 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QTime>
+#include <QScreen>
 
 class QPaintEvent;
 
@@ -69,6 +70,15 @@ public:
         this->next_role_act = roleAct;
     }
 
+    QPoint getPosition() {
+        return this->pos();
+    }
+
+    void resetSpeed() {
+        this->speed.setX(0);
+        this->speed.setY(0);
+    }
+
 public slots:
     void onMenuTriggered(QAction* action);
 
@@ -83,11 +93,13 @@ private:
     //初始化菜单
     void initMenu();
     void CheckRoleAct(RoleAct roleAct);
+    void MovePosition();
 
 private:
     QMap<RoleAct, QList<QPixmap>> action_map_left;
     QMap<RoleAct, QList<QPixmap>> action_map_right;
     QTimer* timer;
+    QTimer* timerMove;
     RoleAct cur_role_act;
     RoleAct next_role_act;
     RoleAct willRoleAct;
@@ -97,6 +109,14 @@ private:
     bool isLoop;//初始状态可能是循环站立
     bool isWill;//准备播放下一个动画
     int index;//记录显示动作的当前图片索引
+
+    QPoint* position;//记录位置
+    QScreen* screen;
+    QRect screenGeometry;
+
+    int gravity;//重力系数
+    QPoint speed;//速度
+    QTime NowTime;
 };
 
 class DragFilter : public QObject {
@@ -110,36 +130,77 @@ public:
 
     bool eventFilter(QObject* obj, QEvent* event) override {
         auto w = dynamic_cast<QWidget*>(obj);
-        if (!w) {
+        if (!w || widget->getCurRoleAct() == RoleAct::Click) {
             return false;
         }
-        if (event->type() == QEvent::MouseButtonPress) {
+        switch (event->type()) {
+        case QEvent::MouseButtonPress:
+        {
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e) {
                 pos = e->pos();
                 if (widget->getCurRoleAct() == RoleAct::Stand && e->buttons() & Qt::MouseButton::LeftButton) {
+                    widget->resetSpeed();
                     // 启动定时器，300毫秒后触发长按事件
                     mLongPressTimer.start(100);
                     mpressed = true;
-                    mclickStartPosition = e->pos();
+                    mclickFirstPosition = e->pos();
                     mclickStartTime = QTime::currentTime();
                 }
             }
-        } else if (event->type() == QEvent::MouseMove) {
+            break;
+        }
+        case QEvent::MouseMove:
+        {
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e) {
                 if (e->buttons() & Qt::MouseButton::LeftButton) {
-                    w->move(e->globalPosition().toPoint() - pos);
+                    // 计算鼠标移动方向和距离
+                    QPoint delta = e->pos() - mclickLastPosition;
+                    QPoint newPos = widget->pos() + delta;
+                    QPoint Eposition = e->globalPosition().toPoint() - pos;
+
+                    // 边界检测逻辑
+                    if (newPos.x() >= 1370) {
+                        newPos.setX(1370);
+                        Eposition.setX(1370);
+                        pos.setX(e->pos().x());
+                    }
+                    if (newPos.x() <= -35) {
+                        newPos.setX(-35);
+                        Eposition.setX(-35);
+                        pos.setX(e->pos().x());
+                    }
+                    if (newPos.y() >= 643) {
+                        newPos.setY(643);
+                        Eposition.setY(643);
+                        pos.setY(e->pos().y());
+                    }
+                    if (newPos.y() <= -45) {
+                        newPos.setY(-45);
+                        Eposition.setY(-45);
+                        pos.setY(e->pos().y());
+                    }
+                    w->move(Eposition);
+                    mclickLastPosition = e->pos();
                 }
             }
-        } else if (event->type() == QEvent::MouseButtonRelease) {
+            break;
+        }
+        case QEvent::MouseButtonRelease:
+        {
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e && e->button() == Qt::LeftButton) {
                 mpressed = false;
                 QTime currentTime = QTime::currentTime();
                 qint64 clickDuration = mclickStartTime.msecsTo(currentTime);
                 QPoint clickEndPosition = e->pos();
-                int clickDistance = QLineF(mclickStartPosition, clickEndPosition).length();
+                int clickDistance = QLineF(mclickFirstPosition, clickEndPosition).length();
+
+                // 获取窗口位置和大小
+                //QPoint windowPos = widget->pos(); // 左上角坐标 (x, y)
+                // 打印窗口位置和大小
+                //qDebug() << "窗口位置 (x, y):" << windowPos;
 
                 mLongPressTimer.stop();
                 // 检测是否为点击事件
@@ -157,8 +218,12 @@ public:
                     }
                 }
             }
+            break;
         }
-        return QObject::eventFilter(obj, event);
+        default:
+            return QObject::eventFilter(obj, event);
+        }
+        return true;
     }
 
 private slots:
@@ -173,7 +238,8 @@ private:
     QPoint pos;
     Widget* widget; //存储 Widget 的指针
     bool mpressed;
-    QPoint mclickStartPosition;
+    QPoint mclickFirstPosition;
+    QPoint mclickLastPosition;
     QTime mclickStartTime;
     QTimer mLongPressTimer;
 };

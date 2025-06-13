@@ -9,17 +9,25 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
     timer(new QTimer(this)),
+    timerMove(new QTimer(this)),
     menu(new QMenu(this)),
     isLoop(true),
     isLeft(true),
     isWill(false),
-    index(0)
+    index(0),
+    gravity(98),
+    speed(0, 0)
 {
+    // 获取屏幕尺寸
+    this->screen = QGuiApplication::primaryScreen();
+    this->screenGeometry = screen->geometry();
+
     this->setWindowFlag(Qt::FramelessWindowHint);//去除窗口边框
     this->setAttribute(Qt::WA_TranslucentBackground);//去除窗口
 
     this->installEventFilter(new DragFilter(this));
 
+    //动画播放
     connect(timer, &QTimer::timeout, this, [this](){
         auto paths = isLeft ? this->action_map_left.value(this->cur_role_act) :
                          this->action_map_right.value(this->cur_role_act);
@@ -31,6 +39,10 @@ Widget::Widget(QWidget *parent)
             showActAnimation(this->next_role_act);
         }
     });
+
+    //窗口移动
+    connect(timerMove, &QTimer::timeout, this, &Widget::MovePosition);
+    timerMove->start(20);
 
     initMenu();
     loadRoleActResLeft();
@@ -57,6 +69,34 @@ void Widget::CheckRoleAct(RoleAct roleAct) {
         this->next_role_act = RoleAct::Stand;
     }
     this->isWill = false;
+}
+
+//左上角：x -35, y -45
+//右下角：x 1370, y 643
+void Widget::MovePosition()
+{
+    //根据每次循环的时间设置移动速度
+    QTime LastTime = this->NowTime;
+    this->NowTime = QTime::currentTime();
+    QPoint position = this->pos();
+    qint64 delta = LastTime.msecsTo(NowTime);
+    if (this->pos().y() < 643 && this->cur_role_act != RoleAct::Drag) {
+        this->speed.setY(this->speed.y() + this->gravity * delta / 1000);
+        position.setY(position.y() + speed.y());
+    }
+
+    if (position.x() >= 1370) {
+        position.setX(1370);
+    } else if (position.x() <= -35) {
+        position.setX(-35);
+    }
+    if (position.y() >= 643) {
+        position.setY(643);
+        this->speed.setY(0);
+    } else if (position.y() <= -45) {
+        position.setY(-45);
+    }
+    move(position);
 }
 
 void Widget::showActAnimation(RoleAct k)
@@ -233,7 +273,7 @@ void Widget::initMenu()
 
     QAction* act = new QAction("退出");
     connect(act, &QAction::triggered, this, [this](){
-        this->setVisible(false);
+        this->close();
     });
 
     menu->addAction(act);
