@@ -20,12 +20,23 @@ Widget::Widget(QWidget *parent)
 {
     // 获取屏幕尺寸
     this->screen = QGuiApplication::primaryScreen();
-    this->screenGeometry = screen->geometry();
+    this->screenRect = screen->geometry();
+    // 可用区域大小
+    this->availableRect = screen->availableGeometry();
+
+    // 计算移动范围
+    this->top = this->availableRect.top() - 45;
+    this->bottom = this->availableRect.bottom() - 268;
+    this->left = this->availableRect.left() - 35;
+    this->right = this->availableRect.right() - 166;
 
     this->setWindowFlag(Qt::FramelessWindowHint);//去除窗口边框
     this->setAttribute(Qt::WA_TranslucentBackground);//去除窗口
 
     this->installEventFilter(new DragFilter(this));
+
+    //任务栏不显示、置于窗口顶层
+    this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::Tool);
 
     //动画播放
     connect(timer, &QTimer::timeout, this, [this](){
@@ -42,7 +53,7 @@ Widget::Widget(QWidget *parent)
 
     //窗口移动
     connect(timerMove, &QTimer::timeout, this, &Widget::MovePosition);
-    timerMove->start(20);
+    this->timerMove->start(20);
 
     initMenu();
     loadRoleActResLeft();
@@ -64,15 +75,13 @@ void Widget::CheckRoleAct(RoleAct roleAct) {
     } else if (roleAct == RoleAct::Greet) {
         this->isLoop = false;
         this->next_role_act = RoleAct::Stand;
-    } else if (roleAct == RoleAct::Greet) {
-        this->isLoop = false;
-        this->next_role_act = RoleAct::Stand;
     }
     this->isWill = false;
 }
 
 //左上角：x -35, y -45
 //右下角：x 1370, y 643
+//屏幕右下角：x 1536, y 959
 void Widget::MovePosition()
 {
     //根据每次循环的时间设置移动速度
@@ -80,21 +89,28 @@ void Widget::MovePosition()
     this->NowTime = QTime::currentTime();
     QPoint position = this->pos();
     qint64 delta = LastTime.msecsTo(NowTime);
-    if (this->pos().y() < 643 && this->cur_role_act != RoleAct::Drag) {
+    if (this->cur_role_act == RoleAct::Drag || this->cur_role_act == RoleAct::Swing_start ||
+        this->cur_role_act == RoleAct::Swing_ing || this->cur_role_act == RoleAct::Swing_end ||
+        this->cur_role_act == RoleAct::Greet || this->cur_role_act == RoleAct::Sleep ||
+        this->cur_role_act == RoleAct::Fly_start || this->cur_role_act == RoleAct::Fly ||
+        this->cur_role_act == RoleAct::Greet) {
+        return;
+    }
+    if (this->pos().y() < this->bottom) {
         this->speed.setY(this->speed.y() + this->gravity * delta / 1000);
         position.setY(position.y() + speed.y());
     }
 
-    if (position.x() >= 1370) {
-        position.setX(1370);
-    } else if (position.x() <= -35) {
-        position.setX(-35);
+    if (position.x() >= this->right) {
+        position.setX(this->right);
+    } else if (position.x() <= this->left) {
+        position.setX(this->left);
     }
-    if (position.y() >= 643) {
-        position.setY(643);
+    if (position.y() >= this->bottom) {
+        position.setY(this->bottom);
         this->speed.setY(0);
-    } else if (position.y() <= -45) {
-        position.setY(-45);
+    } else if (position.y() < this->top) {
+        position.setY(this->top);
     }
     move(position);
 }
@@ -120,6 +136,7 @@ void Widget::onMenuTriggered(QAction *action)
             this->isLoop = false;
             this->isWill = true;
             this->next_role_act = RoleAct::Greet;
+            this->resetSpeed();
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
 
@@ -136,6 +153,7 @@ void Widget::onMenuTriggered(QAction *action)
             this->isLoop = false;
             this->isWill = true;
             this->next_role_act = RoleAct::Fly_start;
+            this->resetSpeed();
             return;
         } else {
             this->willRoleAct = RoleAct::Swing_start;
@@ -148,6 +166,7 @@ void Widget::onMenuTriggered(QAction *action)
             this->isLoop = false;
             this->isWill = true;
             this->next_role_act = RoleAct::Sleep;
+            this->resetSpeed();
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
 
@@ -161,6 +180,7 @@ void Widget::onMenuTriggered(QAction *action)
             this->isLoop = false;
             this->isWill = true;
             this->next_role_act = RoleAct::Stand;
+            this->resetSpeed();
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
 
@@ -172,6 +192,7 @@ void Widget::onMenuTriggered(QAction *action)
         this->willRoleAct = RoleAct::Stand; // 默认动作
         this->isLoop = true;
     }
+    this->resetSpeed();
     showActAnimation(this->willRoleAct);
 }
 

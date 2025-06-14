@@ -79,6 +79,22 @@ public:
         this->speed.setY(0);
     }
 
+    int getLeft() {
+        return this->left;
+    }
+
+    int getRight() {
+        return this->right;
+    }
+
+    int getTop() {
+        return this->top;
+    }
+
+    int getBottom() {
+        return this->bottom;
+    }
+
 public slots:
     void onMenuTriggered(QAction* action);
 
@@ -112,7 +128,13 @@ private:
 
     QPoint* position;//记录位置
     QScreen* screen;
-    QRect screenGeometry;
+    QRect screenRect;
+    QRect availableRect;  // 可用区域大小
+
+    int left;
+    int right;
+    int top;
+    int bottom;
 
     int gravity;//重力系数
     QPoint speed;//速度
@@ -161,24 +183,24 @@ public:
                     QPoint Eposition = e->globalPosition().toPoint() - pos;
 
                     // 边界检测逻辑
-                    if (newPos.x() >= 1370) {
-                        newPos.setX(1370);
-                        Eposition.setX(1370);
+                    if (newPos.x() >= widget->getRight()) {
+                        newPos.setX(widget->getRight());
+                        Eposition.setX(widget->getRight());
                         pos.setX(e->pos().x());
                     }
-                    if (newPos.x() <= -35) {
-                        newPos.setX(-35);
-                        Eposition.setX(-35);
+                    if (newPos.x() <= widget->getLeft()) {
+                        newPos.setX(widget->getLeft());
+                        Eposition.setX(widget->getLeft());
                         pos.setX(e->pos().x());
                     }
-                    if (newPos.y() >= 643) {
-                        newPos.setY(643);
-                        Eposition.setY(643);
+                    if (newPos.y() >= widget->getBottom()) {
+                        newPos.setY(widget->getBottom());
+                        Eposition.setY(widget->getBottom());
                         pos.setY(e->pos().y());
                     }
-                    if (newPos.y() <= -45) {
-                        newPos.setY(-45);
-                        Eposition.setY(-45);
+                    if (newPos.y() <= widget->getTop()) {
+                        newPos.setY(widget->getTop());
+                        Eposition.setY(widget->getTop());
                         pos.setY(e->pos().y());
                     }
                     w->move(Eposition);
@@ -191,6 +213,10 @@ public:
         {
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e && e->button() == Qt::LeftButton) {
+                if (widget->cursor().shape() == Qt::BlankCursor) {
+                    QCursor::setPos(widget->pos().x() + 100, widget->pos().y() + 100);
+                    widget->setCursor(Qt::ArrowCursor);
+                }
                 mpressed = false;
                 QTime currentTime = QTime::currentTime();
                 qint64 clickDuration = mclickStartTime.msecsTo(currentTime);
@@ -201,6 +227,7 @@ public:
                 //QPoint windowPos = widget->pos(); // 左上角坐标 (x, y)
                 // 打印窗口位置和大小
                 //qDebug() << "窗口位置 (x, y):" << windowPos;
+                //qDebug() << "\n鼠标位置 (x, y):" << e->globalPosition().toPoint();
 
                 mLongPressTimer.stop();
                 // 检测是否为点击事件
@@ -228,6 +255,7 @@ public:
 
 private slots:
     void onLongPress() {
+        widget->setCursor(Qt::BlankCursor);
         if (widget) {
             widget->showActAnimation(RoleAct::Drag);
             widget->setLoop(true);
