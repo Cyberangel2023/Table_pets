@@ -24,6 +24,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         imgs.qrc
         imgs_r.qrc
+        HideButton.h HideButton.cpp
+        FileWidget.h FileWidget.cpp
+        AnchorPane.h
+        ScrollPane.h
+        MainFile.h
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Table_pet APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

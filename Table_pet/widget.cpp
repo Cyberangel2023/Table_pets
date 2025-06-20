@@ -1,10 +1,13 @@
 #include "widget.h"
+
 #include <QPaintEvent>
 #include <QPainter>//绘图
 #include <QPixmap>//图片
 #include <QCursor>
 #include <QMetaEnum>
 #include <QPixmapCache>
+#include <QSystemTrayIcon>
+#include <QApplication>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent),
@@ -33,7 +36,8 @@ Widget::Widget(QWidget *parent)
     this->setWindowFlag(Qt::FramelessWindowHint);//去除窗口边框
     this->setAttribute(Qt::WA_TranslucentBackground);//去除窗口
 
-    this->installEventFilter(new DragFilter(this));
+    this->dragFilter = new DragFilter(this);
+    this->installEventFilter(dragFilter);
 
     //任务栏不显示、置于窗口顶层
     this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint | Qt::Tool);
@@ -59,21 +63,81 @@ Widget::Widget(QWidget *parent)
     loadRoleActResLeft();
     loadRoleActResRight();
     showActAnimation(RoleAct::Stand);
+
+    // 创建系统托盘
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("D:\\code\\Qt\\Table_pets\\Table_pet\\resources\\icon\\desk.png"), this);
+    connect(trayIcon, &QSystemTrayIcon::activated, this, [=](QSystemTrayIcon::ActivationReason reason){
+        if (reason == QSystemTrayIcon::DoubleClick) {
+            showNormal();  // 恢复窗口显示
+        }
+    });
+    trayIcon->setToolTip("My Background App");
+    trayIcon->show();
+
+    // 系统托盘菜单
+    QMenu *menu = new QMenu();
+
+    QAction *showAction = new QAction("显示", this);
+    connect(showAction, &QAction::triggered, this, &Widget::showNormal);
+    menu->addAction(showAction);
+
+    QAction *hideAction = new QAction("隐藏", this);
+    connect(hideAction, &QAction::triggered, this, &Widget::hide);
+    menu->addAction(hideAction);
+
+
+    QAction *quitAction = new QAction("退出", this);
+    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+    menu->addAction(quitAction);
+
+    trayIcon->setContextMenu(menu);
+
+    this->fileWidget = new FileWidget();
 }
 
-Widget::~Widget() {}
+Widget::~Widget() {
+    // 释放定时器资源
+    delete this->timer;
+    delete this->timerMove;
+    // 释放菜单资源
+    delete this->menu;
+    // 释放事件过滤器
+    delete this->dragFilter;
+}
+
+void Widget::mouseDoubleClickEvent(QMouseEvent *event) {
+    //qDebug() << "doubleClick";
+    this->fileWidget->reset(this->pos());
+    if (this->fileWidget->isVisible()) {
+        this->fileWidget->hide();
+    } else {
+        this->fileWidget->show();
+        this->fileWidget->activateWindow();
+        this->fileWidget->setFocus(Qt::OtherFocusReason); // 指定非Tab/鼠标原因
+    }
+}
 
 void Widget::CheckRoleAct(RoleAct roleAct) {
     if (roleAct == RoleAct::Stand) {
         this->isLoop = true;
+        this->resetSpeed();
+        this->setCanMove(true);
     } else if (roleAct == RoleAct::Sleep) {
         this->isLoop = true;
+        this->resetSpeed();
+        this->canMove = false;
     } else if (roleAct == RoleAct::Swing_ing) {
         this->isLoop = true;
+        this->resetSpeed();
+        this->canMove = false;
     } else if (roleAct == RoleAct::Fly) {
         this->isLoop = true;
+        this->resetSpeed();
+        this->canMove = false;
     } else if (roleAct == RoleAct::Greet) {
         this->isLoop = false;
+        this->resetSpeed();
+        this->canMove = false;
         this->next_role_act = RoleAct::Stand;
     }
     this->isWill = false;
@@ -89,11 +153,7 @@ void Widget::MovePosition()
     this->NowTime = QTime::currentTime();
     QPoint position = this->pos();
     qint64 delta = LastTime.msecsTo(NowTime);
-    if (this->cur_role_act == RoleAct::Drag || this->cur_role_act == RoleAct::Swing_start ||
-        this->cur_role_act == RoleAct::Swing_ing || this->cur_role_act == RoleAct::Swing_end ||
-        this->cur_role_act == RoleAct::Greet || this->cur_role_act == RoleAct::Sleep ||
-        this->cur_role_act == RoleAct::Fly_start || this->cur_role_act == RoleAct::Fly ||
-        this->cur_role_act == RoleAct::Greet) {
+    if (!this->canMove) {
         return;
     }
     if (this->pos().y() < this->bottom) {
@@ -137,6 +197,7 @@ void Widget::onMenuTriggered(QAction *action)
             this->isWill = true;
             this->next_role_act = RoleAct::Greet;
             this->resetSpeed();
+            this->canMove = false;
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
 
@@ -144,9 +205,13 @@ void Widget::onMenuTriggered(QAction *action)
             this->willRoleAct = RoleAct::Greet;
             this->isLoop = false;
             this->next_role_act = RoleAct::Stand;
+            this->resetSpeed();
+            this->canMove = false;
         }
     } else if (text == "荡秋千") {
         if (this->cur_role_act == RoleAct::Swing_ing) {
+            this->resetSpeed();
+            this->canMove = false;
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
             this->willRoleAct = RoleAct::Swing_end;
@@ -154,11 +219,14 @@ void Widget::onMenuTriggered(QAction *action)
             this->isWill = true;
             this->next_role_act = RoleAct::Fly_start;
             this->resetSpeed();
+            this->canMove = false;
             return;
         } else {
             this->willRoleAct = RoleAct::Swing_start;
             this->isLoop = false;
             this->next_role_act = RoleAct::Swing_ing;
+            this->resetSpeed();
+            this->canMove = false;
         }
     } else if (text == "睡觉") {
         if (this->cur_role_act == RoleAct::Swing_ing) {
@@ -167,12 +235,16 @@ void Widget::onMenuTriggered(QAction *action)
             this->isWill = true;
             this->next_role_act = RoleAct::Sleep;
             this->resetSpeed();
+            this->canMove = false;
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
-
+            this->resetSpeed();
+            this->canMove = false;
         } else {
             this->willRoleAct = RoleAct::Sleep;
             this->isLoop = true;
+            this->resetSpeed();
+            this->canMove = false;
         }
     } else if (text == "站立") {
         if (this->cur_role_act == RoleAct::Swing_ing) {
@@ -181,16 +253,22 @@ void Widget::onMenuTriggered(QAction *action)
             this->isWill = true;
             this->next_role_act = RoleAct::Stand;
             this->resetSpeed();
+            this->canMove = false;
             return;
         } else if (this->cur_role_act == RoleAct::Fly) {
-
+            this->resetSpeed();
+            this->canMove = false;
         } else {
             this->willRoleAct = RoleAct::Stand;
             this->isLoop = true;
+            this->resetSpeed();
+            this->setCanMove(true);
         }
     } else {
         this->willRoleAct = RoleAct::Stand; // 默认动作
         this->isLoop = true;
+        this->resetSpeed();
+        this->setCanMove(true);
     }
     this->resetSpeed();
     showActAnimation(this->willRoleAct);
@@ -295,9 +373,19 @@ void Widget::initMenu()
     QAction* act = new QAction("退出");
     connect(act, &QAction::triggered, this, [this](){
         this->close();
+        qApp->quit();
     });
 
     menu->addAction(act);
 
     connect(this->menu, &QMenu::triggered, this, &Widget::onMenuTriggered);
+}
+
+void Widget::closeEvent(QCloseEvent *event)
+{
+    // 停止定时器并释放定时器资源
+    this->timer->stop();
+    this->timerMove->stop();
+    QCoreApplication::processEvents(); // 处理剩余事件
+    event->accept();
 }

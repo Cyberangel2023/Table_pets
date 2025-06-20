@@ -13,6 +13,8 @@
 #include <QTime>
 #include <QScreen>
 
+#include "FileWidget.h"
+
 class QPaintEvent;
 
 namespace Act {
@@ -95,12 +97,22 @@ public:
         return this->bottom;
     }
 
+    void setCanMove(bool flag) {
+        this->canMove = flag;
+    }
+
+    FileWidget* getFileWidget() {
+        return this->fileWidget;
+    }
+
 public slots:
     void onMenuTriggered(QAction* action);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
+    void closeEvent(QCloseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
     //加载图片
@@ -116,6 +128,7 @@ private:
     QMap<RoleAct, QList<QPixmap>> action_map_right;
     QTimer* timer;
     QTimer* timerMove;
+    QObject* dragFilter;
     RoleAct cur_role_act;
     RoleAct next_role_act;
     RoleAct willRoleAct;
@@ -125,6 +138,7 @@ private:
     bool isLoop;//初始状态可能是循环站立
     bool isWill;//准备播放下一个动画
     int index;//记录显示动作的当前图片索引
+    bool canMove;
 
     QPoint* position;//记录位置
     QScreen* screen;
@@ -139,6 +153,8 @@ private:
     int gravity;//重力系数
     QPoint speed;//速度
     QTime NowTime;
+
+    FileWidget* fileWidget;
 };
 
 class DragFilter : public QObject {
@@ -162,8 +178,7 @@ public:
             if (e) {
                 pos = e->pos();
                 if (widget->getCurRoleAct() == RoleAct::Stand && e->buttons() & Qt::MouseButton::LeftButton) {
-                    widget->resetSpeed();
-                    // 启动定时器，300毫秒后触发长按事件
+                    // 启动定时器，100毫秒后触发长按事件
                     mLongPressTimer.start(100);
                     mpressed = true;
                     mclickFirstPosition = e->pos();
@@ -231,17 +246,21 @@ public:
 
                 mLongPressTimer.stop();
                 // 检测是否为点击事件
-                if (widget->getCurRoleAct() == RoleAct::Stand && clickDuration < 100 && clickDistance < 5) { // 300ms内，移动距离小于5像素
+                if (widget->getCurRoleAct() == RoleAct::Stand && clickDuration < 100 && clickDistance < 5) { // 100ms内，移动距离小于5像素
                     if (widget) {
                         widget->showActAnimation(RoleAct::Click);
                         widget->setLoop(false);
                         widget->setNextRoleAct(RoleAct::Stand);
+                        widget->resetSpeed();
+                        widget->setCanMove(false);
                     }
                 }
                 if (widget->getCurRoleAct() == RoleAct::Drag) {
                     if (widget) {
                         widget->showActAnimation(RoleAct::Stand);
                         widget->setLoop(true);
+                        widget->resetSpeed();
+                        widget->setCanMove(true);
                     }
                 }
             }
@@ -259,6 +278,8 @@ private slots:
         if (widget) {
             widget->showActAnimation(RoleAct::Drag);
             widget->setLoop(true);
+            widget->resetSpeed();
+            widget->setCanMove(false);
         }
     }
 
