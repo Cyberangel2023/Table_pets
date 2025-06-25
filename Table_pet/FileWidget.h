@@ -6,6 +6,11 @@
 #include <QDir>
 #include <QList>
 #include <QTimer>
+#include <QMenu>
+#include <QContextMenuEvent>
+#include <QProcess>
+#include <ShlObj.h> // 链接shell32.lib
+#include <comdef.h>
 
 #include "MainFile.h"
 #include "AnchorPane.h"
@@ -19,11 +24,46 @@ public:
 
 private:
     void focusOutEvent(QFocusEvent *event) override;
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+
+private:
     void listDesktopFiles();
+    void addSystemSpecialItems();
+    void addSpecialItem(const QString &name, const QString &itemPath, QString iconName);
+    void addSpecialItem(const QString &name, const QString &itemPath);
+    QIcon getIconForFile(const QFileInfo &fileInfo);
+    void openThisPC();
+
+private slots:
+    void onOpenActionTriggered();
+    void onCopyActionTriggered();
+    void onDeleteActionTriggered();
+    void initSpecialItems();
+
+public:
+    // 其他成员函数
+    QList<MainFile*> getSelected() {
+        return selectedFiles;
+    }
+
+    void addSelected(MainFile file) {
+        this->selectedFiles.push_back(&file);
+    }
+
+    int getSelectedSize() {
+        return selectedFiles.size();
+    }
+
+    void resetFiles();
 
 public:
     void reset(QPoint position) {
-        this->move(position.x(), position.y() - 200);
+        int posX = position.x() > 400 ? position.x() - 380 : position.x() + 220;
+        this->move(posX, position.y() + 70);
     }
 
 private:
@@ -33,6 +73,9 @@ private:
     // 背景板
     AnchorPane* anchorPane;
     ScrollPane* scrollPane;
+
+    QMenu *contextMenu; // 右键菜单
+    MainFile *contextMenuFile; // 用于存储右键点击的 MainFile 指针
 };
 
 #endif // FILEWIDGET_H

@@ -24,7 +24,7 @@ public:
         QPixmap pixmap;
         QFileInfo fileInfo(filePath);
         QFileIconProvider iconProvider;
-        QIcon icon = iconProvider.icon(fileInfo);
+        icon = iconProvider.icon(fileInfo);
 
         // 强制图标大小
         pixmap = icon.pixmap(QSize(60, 60));
@@ -43,6 +43,13 @@ public:
         connect(this, &MainFile::hovered, this, &MainFile::onHovered);
 
         setFocusPolicy(Qt::NoFocus); // 禁止子组件传递焦点
+    }
+
+    void setIcon(const QString &icoName) {
+        icon = QIcon::fromTheme(icoName);
+        // 强制图标大小
+        QPixmap pixmap = icon.pixmap(QSize(60, 60));
+        setPixmap(pixmap);
     }
 
     QString getFilePath() const {
@@ -113,6 +120,7 @@ public:
 private:
     QString filePath;
     bool selected;
+    QIcon icon;
 };
 
 #endif // MAINFILE_H

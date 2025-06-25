@@ -106,14 +106,15 @@ Widget::~Widget() {
 }
 
 void Widget::mouseDoubleClickEvent(QMouseEvent *event) {
+    // 处理鼠标双击事件
     //qDebug() << "doubleClick";
-    this->fileWidget->reset(this->pos());
-    if (this->fileWidget->isVisible()) {
-        this->fileWidget->hide();
-    } else {
-        this->fileWidget->show();
-        this->fileWidget->activateWindow();
-        this->fileWidget->setFocus(Qt::OtherFocusReason); // 指定非Tab/鼠标原因
+    if (event->button() == Qt::LeftButton) {
+        this->fileWidget->reset(this->pos());
+        if (!this->fileWidget->isVisible()) {
+            this->fileWidget->show();
+            this->fileWidget->activateWindow();
+            this->fileWidget->setFocus(Qt::OtherFocusReason); // 指定非Tab/鼠标原因
+        }
     }
 }
 
