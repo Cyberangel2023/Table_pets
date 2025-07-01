@@ -1,11 +1,15 @@
 #include "widget.h"
 #include "HideButton.h"
+#include "MainScene.h"
 
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    MainScene m;
+    //m.show();
 
     Widget w;
     w.show();

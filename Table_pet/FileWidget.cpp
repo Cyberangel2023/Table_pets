@@ -22,16 +22,16 @@ FileWidget::FileWidget(QWidget *parent)
     this->scrollPane = new ScrollPane();
 
     // 创建一个容器 widget 用于放置滚动内容
-    QWidget *contentWidget = new QWidget();
-    QGridLayout* gridLayout = new QGridLayout(contentWidget);
-    gridLayout->setContentsMargins(10, 10, 10, 10);
+    contentWidget = new QWidget();
+    gridLayout = new QGridLayout(contentWidget);
+    gridLayout->setContentsMargins(10, 5, 5, 10);
     gridLayout->setSpacing(21);
 
     // 使用网格布局添加文件项
     int row = 0, col = 0;
     foreach (MainFile* file, this->deskFiles) {
         gridLayout->addWidget(file, row, col);
-        col = (col + 1) % 5;
+        col = (col + 1) % 4;
         if (col == 0) row++;
     }
 
@@ -53,9 +53,9 @@ FileWidget::FileWidget(QWidget *parent)
 
     // 创建右键菜单
     contextMenu = new QMenu(this);
-    QAction *openAction = contextMenu->addAction("打开");
-    QAction *copyAction = contextMenu->addAction("复制");
-    QAction *deleteAction = contextMenu->addAction("删除");
+    QAction *openAction = contextMenu->addAction(QIcon::fromTheme("document-open"), "打开");
+    QAction *copyAction = contextMenu->addAction(QIcon::fromTheme("edit-copy"), "复制");
+    QAction *deleteAction = contextMenu->addAction(QIcon::fromTheme("edit-delete"), "删除");
 
     // 连接菜单项的信号到槽函数
     connect(openAction, &QAction::triggered, this, &FileWidget::onOpenActionTriggered);
@@ -107,7 +107,7 @@ void FileWidget::listDesktopFiles() {
         // 获取文件路径
         QString filePath = fileInfo.absoluteFilePath();
         // 获取文件名字
-        QString fileName = fileInfo.fileName();
+        QString fileName = fileInfo.baseName();
 
         //qDebug() << fileName;
 
@@ -133,14 +133,6 @@ void FileWidget::addSystemSpecialItems() {
         string,
         path, // RecycleBin
         "user-trash"
-        );
-
-    // 添加微信
-    string = "微信";
-    path = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\微信\\微信.lnk";
-    addSpecialItem(
-        string,
-        path // weChat
         );
 }
 

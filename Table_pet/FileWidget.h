@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <ShlObj.h> // 链接shell32.lib
 #include <comdef.h>
+#include <QMessageBox>
 
 #include "MainFile.h"
 #include "AnchorPane.h"
@@ -73,6 +74,8 @@ private:
     // 背景板
     AnchorPane* anchorPane;
     ScrollPane* scrollPane;
+    QWidget *contentWidget;
+    QGridLayout* gridLayout;
 
     QMenu *contextMenu; // 右键菜单
     MainFile *contextMenuFile; // 用于存储右键点击的 MainFile 指针
