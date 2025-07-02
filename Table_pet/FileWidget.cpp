@@ -12,30 +12,11 @@ FileWidget::FileWidget(QWidget *parent)
     // 设置焦点策略，允许通过 Tab 键或点击获得焦点
     setFocusPolicy(Qt::StrongFocus);
 
-    // 加载文件按钮
-    listDesktopFiles();
-
     // 初始化 ArchorPane
     this->anchorPane = new AnchorPane(this);
 
     // 初始化 scrollPane
     this->scrollPane = new ScrollPane();
-
-    // 创建一个容器 widget 用于放置滚动内容
-    contentWidget = new QWidget();
-    gridLayout = new QGridLayout(contentWidget);
-    gridLayout->setContentsMargins(10, 5, 5, 10);
-    gridLayout->setSpacing(21);
-
-    // 使用网格布局添加文件项
-    int row = 0, col = 0;
-    foreach (MainFile* file, this->deskFiles) {
-        gridLayout->addWidget(file, row, col);
-        col = (col + 1) % 4;
-        if (col == 0) row++;
-    }
-
-    this->scrollPane->setWidget(contentWidget);
 
     // 设置 anchorPane 的边距，将 scrollPane 添加到 anchorPane 的布局中
     QVBoxLayout *anchorPaneLayout = qobject_cast<QVBoxLayout*>(this->anchorPane->layout());
@@ -65,7 +46,16 @@ FileWidget::FileWidget(QWidget *parent)
 
 FileWidget::~FileWidget()
 {
+    // 清理资源
+    QLayoutItem *item;
+    while ((item = gridLayout->takeAt(0)) != nullptr)
+        delete item->widget();
+    delete item;
 
+    delete gridLayout;
+    delete contentWidget;
+    delete scrollPane;
+    delete anchorPane;
 }
 
 void FileWidget::focusOutEvent(QFocusEvent *event)
@@ -84,73 +74,6 @@ void FileWidget::focusOutEvent(QFocusEvent *event)
 
     // 调用基类的focusOutEvent以确保其他处理正常进行
     QWidget::focusOutEvent(event);
-}
-
-void FileWidget::listDesktopFiles() {
-    // 添加系统特殊项
-    addSystemSpecialItems();
-
-    // 获取桌面路径
-    QString desktopPath = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first();
-
-    // 创建桌面目录对象
-    QDir desktopDir(desktopPath);
-
-    // 检查桌面目录是否存在
-    if (!desktopDir.exists()) {
-        qDebug() << "Desktop directory does not exist.";
-        return;
-    }
-
-    // 遍历桌面目录中的文件
-    foreach (QFileInfo fileInfo, desktopDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::System)) {
-        // 获取文件路径
-        QString filePath = fileInfo.absoluteFilePath();
-        // 获取文件名字
-        QString fileName = fileInfo.baseName();
-
-        //qDebug() << fileName;
-
-        MainFile* file = new MainFile(fileName, filePath, this);
-        this->deskFiles.insert(fileName, file);
-    }
-}
-
-void FileWidget::addSystemSpecialItems() {
-    // 添加"我的电脑"特殊项
-    QString string = "我的电脑";
-    QString path = "::20D04FE0-3AEA-1069-A2D8-08002B30309D";
-    addSpecialItem(
-        string,
-        path, // ComputerFolder
-        "computer"
-        );
-
-    // 添加回收站特殊项
-    string = "回收站";
-    path = "::{645FF040-5081-101B-9F08-00AA002F954E}";
-    addSpecialItem(
-        string,
-        path, // RecycleBin
-        "user-trash"
-        );
-}
-
-void FileWidget::addSpecialItem(const QString &name, const QString &itemPath, QString iconName) {
-    // 创建虚拟文件项
-    MainFile* specialItem = new MainFile(name, itemPath, this);
-
-    specialItem->setToolTip(name);
-    specialItem->setIcon(iconName);
-    deskFiles.insert(name, specialItem);
-}
-
-void FileWidget::addSpecialItem(const QString &name, const QString &itemPath) {
-    // 创建虚拟文件项
-    MainFile* specialItem = new MainFile(name, itemPath, this);
-
-    specialItem->setToolTip(name);
-    deskFiles.insert(name, specialItem);
 }
 
 void FileWidget::mouseDoubleClickEvent(QMouseEvent *event) {
@@ -175,6 +98,26 @@ void FileWidget::mouseDoubleClickEvent(QMouseEvent *event) {
             }
         }
     }
+}
+
+void FileWidget::addContent(QMap<QString, MainFile*> *showFile)
+{
+    // 创建一个容器 widget 用于放置滚动内容
+    contentWidget = new QWidget();
+    gridLayout = new QGridLayout(contentWidget);
+    gridLayout->setContentsMargins(10, 5, 5, 10);
+    gridLayout->setSpacing(21);
+
+    // 使用网格布局添加文件项
+    int row = 0, col = 0;
+    foreach (MainFile* file, *showFile) {
+        file->setParent(contentWidget);
+        gridLayout->addWidget(file, row, col);
+        col = (col + 1) % 4;
+        if (col == 0) row++;
+    }
+
+    this->scrollPane->setWidget(contentWidget);
 }
 
 void FileWidget::mousePressEvent(QMouseEvent *event) {

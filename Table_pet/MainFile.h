@@ -15,9 +15,6 @@
 #include <QDesktopServices>
 #include <QVBoxLayout>
 #include <QEvent>
-#include <QFontDatabase>
-#include <QPaintEvent>
-#include <QPainter>
 
 class MainFile : public QWidget {
     Q_OBJECT
@@ -34,10 +31,21 @@ public:
 
         // 设置图标
         initIcon();
+        Layout->addWidget(iconLabel);
         // 设置名称
         setFileName();
+        Layout->addWidget(nameLabel);
+
+        iconLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
+        nameLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
         setLayout(this->Layout);
+
+        hoverBg = new QLabel(this);
+        hoverBg->setStyleSheet("background: transparent;");
+        hoverBg->setGeometry(0, 0, 80, 85);
+        hoverBg->lower();  // 确保背景层在最底层
+        hoverBg->setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
     ~MainFile() {
@@ -51,14 +59,14 @@ signals:
 protected:
     void enterEvent(QEnterEvent *event) override {
         if (!selected) {
-            //setStyleSheet("background-color: rgba(255, 255, 255, 32);");
+            hoverBg->setStyleSheet("background-color: rgba(255, 255, 255, 32);");
         }
         QWidget::enterEvent(event);
     }
 
     void leaveEvent(QEvent *event) override {
         if (!selected) {
-            //setStyleSheet("background: transparent;");
+            hoverBg->setStyleSheet("background: transparent;");
         }
         QWidget::leaveEvent(event);
     }
@@ -74,27 +82,27 @@ protected:
 private slots:
     void updateStyle() {
         if (selected) {
-            //setStyleSheet("background-color: rgba(255, 255, 255, 64);");
+            hoverBg->setStyleSheet("background-color: rgba(255, 255, 255, 64);");
         } else {
-            //setStyleSheet("background: transparent;");
+            hoverBg->setStyleSheet("background: transparent;");
         }
     }
 
 private:
     void setFileName() {
         // 设置名称
-        this->nameLabel = new QLabel(this->fileName, this);
+        this->nameLabel = new QLabel(this);
 
         // 基础样式表（不含对齐方式）
         QString style = R"(
-        color: white;
+        color: #000000;
         background: transparent;
         font-family: Microsoft YaHei, Segoe UI, Arial;
         font-size: 10px;
         padding: 0 4px;
         line-height: 10px;
-        min-height: 10px;
-        max-height: 10px;
+        min-height: 15px;
+        max-height: 15px;
         border: none;
         border-radius: 2px;
         letter-spacing: 0.5px;
@@ -113,36 +121,53 @@ private:
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
         nameLabel->setSizePolicy(sizePolicy);
-        nameLabel->setMinimumSize(QSize(80, 10));
-        nameLabel->setMaximumSize(QSize(80, 10));
+        nameLabel->setMinimumSize(QSize(80, 15));
+        nameLabel->setMaximumSize(QSize(80, 15));
 
         // 智能对齐计算
         QFontMetrics fm(font);
         int textWidth = fm.horizontalAdvance(this->fileName);
         int labelWidth = nameLabel->width();
 
-        // 动态样式生成
-        style += (textWidth <= labelWidth)
-                     ? "text-align: center;"
-                     : "text-align: left;";
-
-        nameLabel->setStyleSheet(style);
-
+        QString baseText = this->fileName;
+        QString realName;
         // 布局优化
         Layout->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         nameLabel->setAlignment(Qt::AlignCenter);
 
         // 智能布局策略
-        if (textWidth > labelWidth - 20) {
+        if (textWidth > labelWidth - 15) {
             nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
             Layout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+            baseText = fm.elidedText(this->fileName, Qt::ElideRight, labelWidth - 15);
         }
 
-        Layout->addWidget(nameLabel);
+        // 带空间优化的截断处理
+        if (baseText.endsWith("...")) {
+            // 空格压缩逻辑
+            int len = baseText.length();
+            if (len > 10 && baseText[10] == ' ') {
+                // 去除省略号前空格并重组
+                realName = baseText.left(10) + "...";
+            } else {
+                realName = baseText;
+            }
+        } else {
+            realName = baseText;
+        }
+
+        // 动态样式生成
+        style += (textWidth <= labelWidth - 12)
+                     ? "text-align: center;"
+                     : "text-align: left;";
+
+        nameLabel->setStyleSheet(style);
+        nameLabel->setText(realName);
     }
 
     void initIcon() {
-        this->iconLabel = new QLabel();
+        this->iconLabel = new QLabel(this);
         // 设置图片
         QPixmap pixmap;
         QFileInfo fileInfo(filePath);
@@ -159,8 +184,6 @@ private:
         iconLabel->setStyleSheet("background: transparent;");
         // 图片居中显示
         iconLabel->setAlignment(Qt::AlignCenter);
-
-        Layout->addWidget(iconLabel);
     }
 
     void setIcon() {
@@ -192,7 +215,7 @@ public:
     }
 
     void reset() {
-        //setStyleSheet("background: transparent;");
+        hoverBg->setStyleSheet("background: transparent;");
         this->selected = false;
     }
 
@@ -230,6 +253,7 @@ private:
     QIcon icon;
     QLabel* iconLabel;
     QLabel* nameLabel;
+    QLabel* hoverBg;
     QVBoxLayout* Layout;
 };
 

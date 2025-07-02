@@ -30,6 +30,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ScrollPane.h
         MainFile.h
         MainScene.h MainScene.cpp
+        WallpaperStyle.h
+        DraggableTreeView.h
+        DraggableListWidget.h
 
     )
 # Define target properties for Android with Qt 6 as:

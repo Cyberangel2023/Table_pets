@@ -50,7 +50,7 @@ class Widget : public QWidget
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = nullptr);
+    Widget(FileWidget *fileWidget, QWidget *parent = nullptr);
     ~Widget();
 
 public:
@@ -99,10 +99,6 @@ public:
 
     void setCanMove(bool flag) {
         this->canMove = flag;
-    }
-
-    FileWidget* getFileWidget() {
-        return this->fileWidget;
     }
 
 public slots:

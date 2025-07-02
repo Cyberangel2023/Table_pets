@@ -32,10 +32,6 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
-    void listDesktopFiles();
-    void addSystemSpecialItems();
-    void addSpecialItem(const QString &name, const QString &itemPath, QString iconName);
-    void addSpecialItem(const QString &name, const QString &itemPath);
     QIcon getIconForFile(const QFileInfo &fileInfo);
     void openThisPC();
 
@@ -61,6 +57,8 @@ public:
 
     void resetFiles();
 
+    void addContent(QMap<QString, MainFile*> *showFile);
+
 public:
     void reset(QPoint position) {
         int posX = position.x() > 400 ? position.x() - 380 : position.x() + 220;
@@ -68,7 +66,6 @@ public:
     }
 
 private:
-    QMap<QString, MainFile*> deskFiles; // 储存桌面文件
     QList<MainFile*> selectedFiles; // 选择的文件
 
     // 背景板

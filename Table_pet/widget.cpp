@@ -9,8 +9,9 @@
 #include <QSystemTrayIcon>
 #include <QApplication>
 
-Widget::Widget(QWidget *parent)
+Widget::Widget(FileWidget *fileWidget, QWidget *parent)
     : QWidget(parent),
+    fileWidget(fileWidget),
     timer(new QTimer(this)),
     timerMove(new QTimer(this)),
     menu(new QMenu(this)),
@@ -91,8 +92,6 @@ Widget::Widget(QWidget *parent)
     menu->addAction(quitAction);
 
     trayIcon->setContextMenu(menu);
-
-    this->fileWidget = new FileWidget();
 }
 
 Widget::~Widget() {
