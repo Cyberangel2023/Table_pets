@@ -57,7 +57,7 @@ public:
 
     void resetFiles();
 
-    void addContent(QMap<QString, MainFile*> *showFile);
+    void addContent(QMap<int, MainFile*> *showFile);
 
 public:
     void reset(QPoint position) {

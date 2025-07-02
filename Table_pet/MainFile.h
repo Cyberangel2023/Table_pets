@@ -95,7 +95,7 @@ private:
 
         // 基础样式表（不含对齐方式）
         QString style = R"(
-        color: #000000;
+        color: white;
         background: transparent;
         font-family: Microsoft YaHei, Segoe UI, Arial;
         font-size: 10px;
@@ -189,11 +189,14 @@ private:
     void setIcon() {
         // 强制图标大小
         QFileIconProvider iconProvider;
-        if (icoName == "computer")
-        {
+        if (icoName == "computer") {
             icon = iconProvider.icon(QFileIconProvider::Computer);
         } else if (icoName == "user-trash") {
             icon = iconProvider.icon(QFileIconProvider::Trashcan);
+        } else if (icoName == "home") {
+            icon = iconProvider.icon(QFileIconProvider::Folder);
+        } else if (icoName == "control-panel") {
+            icon = iconProvider.icon(QFileIconProvider::Drive);
         } else {
             icon = QIcon::fromTheme(icoName);
         }

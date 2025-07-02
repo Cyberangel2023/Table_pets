@@ -203,13 +203,16 @@ void MainScene::listShowFile()
 
         QStringList parts = line.split('?');
         if (parts.size() >= 3) {
+            QString fileIndex;
             QString filePath;
             QString fileName;
             filePath = parts[2]; // 第三部分是文件路径
             fileName = parts[1]; // 第二部分是文件名称
+            fileIndex = parts[0]; // 第一部分是文件索引
             //qDebug() << fileName;
             MainFile* file = new MainFile(fileName, filePath, this);
-            this->showFiles.insert(fileName, file);
+            file->toolTip() = fileName;;
+            this->showFiles.insert(fileIndex.toInt() + 4, file);
         }
     }
     file.close();
@@ -218,38 +221,56 @@ void MainScene::listShowFile()
 }
 
 void MainScene::addSystemSpecialItems() {
-    // 添加"我的电脑"特殊项
-    QString string = "我的电脑";
-    QString path = "::20D04FE0-3AEA-1069-A2D8-08002B30309D";
+    // 添加文件资源管理器特殊项
+    QString string = "文件资源管理器";
+    QString path = "C:/Windows/explorer.exe";
+    int index = 1;
     addSpecialItem(
         string,
         path, // ComputerFolder
-        "computer"
+        "home",
+        index
+        );
+
+    // 添加"我的电脑"特殊项
+    string = "我的电脑";
+    path = "::20D04FE0-3AEA-1069-A2D8-08002B30309D";
+    index = 2;
+    addSpecialItem(
+        string,
+        path, // ComputerFolder
+        "computer",
+        index
         );
 
     // 添加回收站特殊项
     string = "回收站";
     path = "::{645FF040-5081-101B-9F08-00AA002F954E}";
+    index = 3;
     addSpecialItem(
         string,
         path, // RecycleBin
-        "user-trash"
+        "user-trash",
+        index
+        );
+
+    // 添加控制面板特殊项
+    string = "控制面板";
+    path = "::{21EC2020-3AEA-1069-A2DD-08002B30309D}";
+    index = 4;
+    addSpecialItem(
+        string,
+        path, // RecycleBin
+        "control-panel",
+        index
         );
 }
 
-void MainScene::addSpecialItem(const QString &name, const QString &itemPath, QString iconName) {
+void MainScene::addSpecialItem(const QString &name, const QString &itemPath, QString iconName, int index) {
     // 创建虚拟文件项
     MainFile* specialItem = new MainFile(name, itemPath, this);
 
     specialItem->setToolTip(name);
     specialItem->setIcon(iconName);
-    showFiles.insert(name, specialItem);
-}
-
-void MainScene::addSpecialItem(const QString &name, const QString &itemPath) {
-    // 创建虚拟文件项
-    MainFile* specialItem = new MainFile(name, itemPath, this);
-
-    specialItem->setToolTip(name);
-    showFiles.insert(name, specialItem);
+    showFiles.insert(index, specialItem);
 }

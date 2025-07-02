@@ -29,8 +29,7 @@ private:
     void clearFile();
     void listShowFile();
     void addSystemSpecialItems();
-    void addSpecialItem(const QString &name, const QString &itemPath, QString iconName);
-    void addSpecialItem(const QString &name, const QString &itemPath);
+    void addSpecialItem(const QString &name, const QString &itemPath, QString iconName, int index);
     void addToFileWidget();
 
 private:
@@ -42,7 +41,7 @@ private:
     Widget* widget;
     FileWidget* fileWidget;
 
-    QMap<QString, MainFile*> showFiles; // 储存显示的文件
+    QMap<int, MainFile*> showFiles; // 储存显示的文件
 };
 
 #endif // MAINSCENE_H

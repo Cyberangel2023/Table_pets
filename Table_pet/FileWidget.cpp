@@ -100,7 +100,7 @@ void FileWidget::mouseDoubleClickEvent(QMouseEvent *event) {
     }
 }
 
-void FileWidget::addContent(QMap<QString, MainFile*> *showFile)
+void FileWidget::addContent(QMap<int, MainFile*> *showFile)
 {
     // 创建一个容器 widget 用于放置滚动内容
     contentWidget = new QWidget();
