@@ -11,7 +11,7 @@ MainScene::MainScene(Widget *widget, FileWidget *fileWidget, QWidget *parent)
 
     style = WallpaperStyle::Fill;
     SetWallpaperStyle();
-    wallpaperPath = GetRealPathFromResource(":/Wallpaper/resources/icons/Kiana2.jpg");
+    wallpaperPath = resourceToAbsolutePath(":/Wallpaper/resources/icons/Kiana2.jpg");
     SetWallpaper();
 
     // 创建系统托盘
@@ -106,16 +106,29 @@ bool MainScene::SetWallpaperStyle()
     return true;
 }
 
-QString MainScene::GetRealPathFromResource(const QString &resourcePath)
+QString MainScene::resourceToAbsolutePath(const QString &resourcePath)
 {
-    QFile file(resourcePath);
-    if (file.exists()) {
-        QString tempPath = QDir::tempPath() + "/wallpaper.jpg";
-        if (file.copy(tempPath)) {
-            return tempPath;
-        }
+    // 检查是否是资源路径
+    if (!resourcePath.startsWith(":/")) {
+        return resourcePath; // 如果已经是绝对路径，直接返回
     }
-    return QString();
+
+    // 生成临时文件路径（在系统临时目录中）
+    QString fileName = QFileInfo(resourcePath).fileName();
+    QString tempPath = QDir::tempPath() + "/" + fileName;
+
+    // 如果临时文件已存在，直接返回路径
+    if (QFile::exists(tempPath)) {
+        return tempPath;
+    }
+
+    // 从资源复制到临时文件
+    if (QFile::copy(resourcePath, tempPath)) {
+        return tempPath;
+    } else {
+        qWarning() << "Failed to copy resource to temp path:" << resourcePath;
+        return QString();
+    }
 }
 
 bool MainScene::SetWallpaper()

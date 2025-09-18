@@ -21,7 +21,7 @@ public:
     ~MainScene();
 
 private:
-    QString GetRealPathFromResource(const QString &resourcePath); // 获取绝对路径
+    QString resourceToAbsolutePath(const QString &resourcePath); // 获取绝对路径
     bool SetWallpaperStyle(); // 设置壁纸样式
     bool SetWallpaper(); // 设置壁纸
     bool HideDesktopIcons(bool hide); // 设置桌面图标是否隐藏
