@@ -67,6 +67,7 @@ public:
 
 private:
     QList<MainFile*> selectedFiles; // 选择的文件
+    MainFile *lastSelectedFile = nullptr; // 最后一次点击的文件
 
     // 背景板
     AnchorPane* anchorPane;

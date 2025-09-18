@@ -15,6 +15,7 @@
 #include <QDesktopServices>
 #include <QVBoxLayout>
 #include <QEvent>
+#include <QGraphicsDropShadowEffect>
 
 class MainFile : public QWidget {
     Q_OBJECT
@@ -161,6 +162,13 @@ private:
         style += (textWidth <= labelWidth - 12)
                      ? "text-align: center;"
                      : "text-align: left;";
+
+        // 添加阴影效果
+        QGraphicsDropShadowEffect* shadow = new QGraphicsDropShadowEffect();
+        shadow->setColor(QColor(0, 0, 0, 180)); // 阴影颜色和透明度
+        shadow->setBlurRadius(4);               // 模糊半径
+        shadow->setOffset(1.5, 2.5);                // 阴影偏移量
+        nameLabel->setGraphicsEffect(shadow);   // 应用阴影
 
         nameLabel->setStyleSheet(style);
         nameLabel->setText(realName);

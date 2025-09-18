@@ -101,6 +101,10 @@ public:
         this->canMove = flag;
     }
 
+    void setLeftButtonState(bool flag) {
+        this->isLeftButtonPressed = flag;
+    }
+
 public slots:
     void onMenuTriggered(QAction* action);
 
@@ -135,6 +139,7 @@ private:
     bool isWill;//准备播放下一个动画
     int index;//记录显示动作的当前图片索引
     bool canMove;
+    bool isLeftButtonPressed = false;//左键是否按下
 
     QPoint* position;//记录位置
     QScreen* screen;
@@ -172,6 +177,9 @@ public:
         {
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e) {
+                if (e->buttons() & Qt::MouseButton::LeftButton) {
+                    widget->setLeftButtonState(true);
+                }
                 pos = e->pos();
                 if (widget->getCurRoleAct() == RoleAct::Stand && e->buttons() & Qt::MouseButton::LeftButton) {
                     // 启动定时器，100毫秒后触发长按事件
@@ -224,6 +232,7 @@ public:
         {
             auto e = dynamic_cast<QMouseEvent*>(event);
             if (e && e->button() == Qt::LeftButton) {
+                widget->setLeftButtonState(false);
                 if (widget->cursor().shape() == Qt::BlankCursor) {
                     QCursor::setPos(widget->pos().x() + 100, widget->pos().y() + 100);
                     widget->setCursor(Qt::ArrowCursor);

@@ -264,7 +264,9 @@ void Widget::paintEvent(QPaintEvent* event) {
 
 void Widget::contextMenuEvent(QContextMenuEvent *event)
 {
-    this->menu->popup(QCursor::pos());
+    if (isLeftButtonPressed == false) {
+        this->menu->popup(QCursor::pos());
+    }
 }
 
 void Widget::loadRoleActResLeft()

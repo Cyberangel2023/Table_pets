@@ -25,7 +25,7 @@ FileWidget::FileWidget(QWidget *parent)
         anchorPaneLayout->addWidget(this->scrollPane);
     }
 
-    // 将 AnchorPane 添加到 MainScene 的布局中
+    // 将 anchorPane 添加到 MainScene 的布局中
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addWidget(this->anchorPane);
@@ -133,6 +133,7 @@ void FileWidget::mousePressEvent(QMouseEvent *event) {
                 bool shiftPressed = qApp->keyboardModifiers() & Qt::ShiftModifier;
 
                 if (ctrlPressed) {
+                    lastSelectedFile = clickedFile;
                     // Ctrl 多选：切换选中状态
                     if (this->selectedFiles.contains(clickedFile)) {
                         this->selectedFiles.removeOne(clickedFile);
@@ -143,8 +144,43 @@ void FileWidget::mousePressEvent(QMouseEvent *event) {
                     }
                 } else if (shiftPressed && !this->selectedFiles.isEmpty()) {
                     // Shift 多选：从最后一个选中的 MainFile 到当前点击的 MainFile 之间的所有 MainFile 都被选中
-                    // 这里需要实现 Shift 多选逻辑
+                    if (lastSelectedFile == nullptr || lastSelectedFile == clickedFile) {
+                        lastSelectedFile = clickedFile;
+                        clickedFile->setSelected(true);
+                    } else {
+                        resetFiles();
+                        bool selecting = false; // 标记是否已进入选择范围
+                        MainFile* startFile = lastSelectedFile;
+                        MainFile* endFile = clickedFile;
+
+                        // 遍历 gridLayout 中的所有项
+                        for (int i = 0; i < gridLayout->count(); ++i) {
+                            QLayoutItem* item = gridLayout->itemAt(i);
+                            MainFile* currentFile = qobject_cast<MainFile*>(item->widget());
+
+                            if (!currentFile) continue; // 确保获取到的是 MainFile 对象
+
+                            // 如果当前文件是起点或终点，翻转 selecting 状态
+                            if (currentFile == startFile || currentFile == endFile) {
+                                selecting = !selecting;
+                                // 选中起点或终点本身
+                                currentFile->setSelected(true);
+                                this->selectedFiles.push_back(currentFile);
+
+                                // 如果在选中一个端点后，另一个端点恰好是同一个（理论上已在上文排除），或者这是最后一个端点，则结束
+                                if (!selecting) {
+                                    break; // 范围选择完成
+                                }
+                            }
+                            // 如果当前在选择范围内，则选中该文件
+                            else if (selecting) {
+                                currentFile->setSelected(true);
+                                this->selectedFiles.push_back(currentFile);
+                            }
+                        }
+                    }
                 } else {
+                    lastSelectedFile = clickedFile;
                     // 单选：清除之前的选中状态，选中当前点击的 MainFile
                     resetFiles();
                     this->selectedFiles.push_back(clickedFile);
