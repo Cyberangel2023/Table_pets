@@ -1,4 +1,6 @@
 #include "HideButton.h"
+#include <QGuiApplication>
+#include <QScreen>
 
 HideButton::HideButton(Widget* mainScene, QWidget *parent)
     : QWidget(parent), mainScene(mainScene)

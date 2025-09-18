@@ -1,4 +1,4 @@
-#include "widget.h"
+#include "Widget.h"
 
 #include <QPaintEvent>
 #include <QPainter>//绘图

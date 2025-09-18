@@ -1,10 +1,14 @@
 #include "MainScene.h"
+#include "ui_MainScene.h"
+
 #include <QApplication>
 #include <QSystemTrayIcon>
 
 MainScene::MainScene(Widget *widget, FileWidget *fileWidget, QWidget *parent)
-    : widget(widget), fileWidget(fileWidget)
+    : widget(widget), fileWidget(fileWidget), ui(new Ui::MainScene)
 {
+    ui->setupUi(this);
+
     createAndWriteFile();
     // clearFile();
     listShowFile();
@@ -45,6 +49,8 @@ MainScene::MainScene(Widget *widget, FileWidget *fileWidget, QWidget *parent)
 
 MainScene::~MainScene()
 {
+    delete ui;
+
     // 确保文件关闭和删除
     if (this->Txt1) {
         this->Txt1->close();

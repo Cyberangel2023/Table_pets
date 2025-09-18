@@ -1,4 +1,4 @@
-#include "widget.h"
+#include "Widget.h"
 #include "HideButton.h"
 #include "MainScene.h"
 #include "FileWidget.h"

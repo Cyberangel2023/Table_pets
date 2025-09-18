@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 
-#include "widget.h"
+#include "Widget.h"
 
 class HideButton : public QWidget
 {
@@ -22,7 +22,6 @@ private:
     QRect screenRect; // 屏幕大小
     QRect availableRect;  // 可用区域大小
 
-private:
     Widget* mainScene;
 };
 

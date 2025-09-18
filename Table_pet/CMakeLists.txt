@@ -14,8 +14,8 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
         main.cpp
-        widget.cpp
-        widget.h
+        Widget.cpp
+        Widget.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -30,10 +30,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         AnchorPane.h
         ScrollPane.h
         MainFile.h
-        MainScene.h MainScene.cpp
         WallpaperStyle.h
         DraggableTreeView.h
         DraggableListWidget.h
+        MainScene.h MainScene.cpp MainScene.ui
 
     )
 # Define target properties for Android with Qt 6 as:

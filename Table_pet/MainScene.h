@@ -14,6 +14,10 @@
 #include "Widget.h"
 #include "FileWidget.h"
 
+namespace Ui {
+class MainScene;
+}
+
 class MainScene : public QWidget
 {
 public:
@@ -43,6 +47,8 @@ private:
     FileWidget* fileWidget;
 
     QMap<int, MainFile*> showFiles; // 储存显示的文件
+
+    Ui::MainScene *ui;
 };
 
 #endif // MAINSCENE_H
