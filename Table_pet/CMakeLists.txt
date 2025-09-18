@@ -24,6 +24,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         imgs.qrc
         imgs_r.qrc
+        icons.qrc
         HideButton.h HideButton.cpp
         FileWidget.h FileWidget.cpp
         AnchorPane.h
@@ -33,7 +34,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         WallpaperStyle.h
         DraggableTreeView.h
         DraggableListWidget.h
-        icons.qrc
 
     )
 # Define target properties for Android with Qt 6 as:
