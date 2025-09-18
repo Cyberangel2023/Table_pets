@@ -1,4 +1,6 @@
 #include "MainScene.h"
+#include <QApplication>
+#include <QSystemTrayIcon>
 
 MainScene::MainScene(Widget *widget, FileWidget *fileWidget, QWidget *parent)
     : widget(widget), fileWidget(fileWidget)
@@ -9,10 +11,36 @@ MainScene::MainScene(Widget *widget, FileWidget *fileWidget, QWidget *parent)
 
     style = WallpaperStyle::Fill;
     SetWallpaperStyle();
-    wallpaperPath = "C:\\Users\\25444\\Desktop\\imgs\\Kiana3.jpg";
+    wallpaperPath = GetRealPathFromResource(":/Wallpaper/resources/icons/Kiana2.jpg");
     SetWallpaper();
 
-    HideDesktopIcons(false);
+    // 创建系统托盘
+    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon(":/icons/resources/icons/icon.png"), this);
+    connect(trayIcon, &QSystemTrayIcon::activated, this, [=](QSystemTrayIcon::ActivationReason reason){
+        if (reason == QSystemTrayIcon::DoubleClick) {
+            showNormal();  // 恢复窗口显示
+        }
+    });
+    trayIcon->setToolTip("My Background App");
+    trayIcon->show();
+
+    // 系统托盘菜单
+    QMenu *menu = new QMenu();
+
+    QAction *showAction = new QAction("设置", this);
+    connect(showAction, &QAction::triggered, this, &Widget::showNormal);
+    menu->addAction(showAction);
+
+    QAction *quitAction = new QAction("退出", this);
+    connect(quitAction, &QAction::triggered, qApp, [=](){
+        HideDesktopIcons(false);
+        qApp->quit();
+    });
+    menu->addAction(quitAction);
+
+    trayIcon->setContextMenu(menu);
+
+    HideDesktopIcons(true);
 }
 
 MainScene::~MainScene()
@@ -76,6 +104,18 @@ bool MainScene::SetWallpaperStyle()
     // 关闭注册表键
     RegCloseKey(hKey);
     return true;
+}
+
+QString MainScene::GetRealPathFromResource(const QString &resourcePath)
+{
+    QFile file(resourcePath);
+    if (file.exists()) {
+        QString tempPath = QDir::tempPath() + "/wallpaper.jpg";
+        if (file.copy(tempPath)) {
+            return tempPath;
+        }
+    }
+    return QString();
 }
 
 bool MainScene::SetWallpaper()

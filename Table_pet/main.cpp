@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     // 主界面
     MainScene* m = new MainScene(w, f);
-    m->show();
+    //m->show();
 
     return a.exec();
 }

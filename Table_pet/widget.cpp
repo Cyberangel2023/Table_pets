@@ -65,33 +65,7 @@ Widget::Widget(FileWidget *fileWidget, QWidget *parent)
     loadRoleActResRight();
     showActAnimation(RoleAct::Stand);
 
-    // 创建系统托盘
-    QSystemTrayIcon *trayIcon = new QSystemTrayIcon(QIcon("D:\\code\\Qt\\Table_pets\\Table_pet\\resources\\icon\\desk.png"), this);
-    connect(trayIcon, &QSystemTrayIcon::activated, this, [=](QSystemTrayIcon::ActivationReason reason){
-        if (reason == QSystemTrayIcon::DoubleClick) {
-            showNormal();  // 恢复窗口显示
-        }
-    });
-    trayIcon->setToolTip("My Background App");
-    trayIcon->show();
 
-    // 系统托盘菜单
-    QMenu *menu = new QMenu();
-
-    QAction *showAction = new QAction("显示", this);
-    connect(showAction, &QAction::triggered, this, &Widget::showNormal);
-    menu->addAction(showAction);
-
-    QAction *hideAction = new QAction("隐藏", this);
-    connect(hideAction, &QAction::triggered, this, &Widget::hide);
-    menu->addAction(hideAction);
-
-
-    QAction *quitAction = new QAction("退出", this);
-    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
-    menu->addAction(quitAction);
-
-    trayIcon->setContextMenu(menu);
 }
 
 Widget::~Widget() {
@@ -363,6 +337,34 @@ void Widget::loadRoleActResRight()
     addRes(RoleAct::Walk, ":/Walk_r/resources/action_r/walk_%d.png", 24);
 }
 
+bool HideDesktopIcons(bool hide) {
+    // 获取桌面窗口句柄
+    HWND hWndDesktop = FindWindow(L"Progman", L"Program Manager");
+    if (hWndDesktop == NULL) {
+        return -1;
+    }
+
+    // 获取桌面图标的句柄
+    HWND hWndFolderView = FindWindowEx(hWndDesktop, NULL, L"SHELLDLL_DefView", NULL);
+    if (hWndFolderView == NULL) {
+        return -1;
+    }
+
+    // 获取桌面图标的子窗口句柄
+    HWND hWndIconView = FindWindowEx(hWndFolderView, NULL, L"SysListView32", L"FolderView");
+    if (hWndIconView == NULL) {
+        return -1;
+    }
+
+    if (hide) {
+        // 隐藏桌面图标
+        ShowWindow(hWndIconView, SW_HIDE);
+    } else {
+        ShowWindow(hWndIconView, SW_SHOW);
+    }
+    return false;
+}
+
 void Widget::initMenu()
 {
     menu->addAction("打招呼");
@@ -370,12 +372,25 @@ void Widget::initMenu()
     menu->addAction("睡觉");
     menu->addAction("站立");
 
+    QAction* act1 = new QAction("显示桌面图标");
+    connect(act1, &QAction::triggered, this, [this](){
+        HideDesktopIcons(false);
+    });
+
+    QAction* act2 = new QAction("隐藏桌面图标");
+    connect(act2, &QAction::triggered, this, [this](){
+        HideDesktopIcons(true);
+    });
+
     QAction* act = new QAction("退出");
     connect(act, &QAction::triggered, this, [this](){
+        HideDesktopIcons(false);
         this->close();
         qApp->quit();
     });
 
+    menu->addAction(act1);
+    menu->addAction(act2);
     menu->addAction(act);
 
     connect(this->menu, &QMenu::triggered, this, &Widget::onMenuTriggered);

@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>resources/icons/icon.png</file>
+    </qresource>
+    <qresource prefix="/Wallpaper">
+        <file>resources/icons/Kiana1.jpg</file>
+        <file>resources/icons/Kiana2.jpg</file>
+        <file>resources/icons/Kiana3.jpg</file>
+    </qresource>
+</RCC>
